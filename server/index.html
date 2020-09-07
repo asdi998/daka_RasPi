@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>用户信息</title>
+  <script src="https://www.layuicdn.com/auto/layui.js" v="layui" e="layui"></script>
+</head>
+
+<body>
+  <div>
+    <ul class="layui-nav" style="text-align: right;">
+      <li class="layui-nav-item layui-this">
+        <a href="index.html">用户信息</a>
+        <dl class="layui-nav-child" style="text-align: center;">
+          <dd><a href="javascript: add();">添加用户</a></dd>
+        </dl>
+      </li>
+      <li class="layui-nav-item"><a href="log.html">打卡日志</a></li>
+    </ul>
+  </div>
+  <div style="padding: 20px; background-color: #F2F2F2;">
+    <div class="layui-fluid" id="list">
+      <h1>用户列表</h1>
+      <table id="userlist" lay-filter="list"></table>
+      <script type="text/html" id="bar">
+      <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">编辑</a>
+      <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="del">删除</a>
+      </script>
+    </div>
+    <div class="layui-fluid" id="editPanel" style="display: none;">
+      <h1>编辑用户</h1>
+      <form id="form1" class="layui-form" action="" enctype="multipart/form-data" lay-filter="form">
+        <div class="layui-form-item">
+          <label class="layui-form-label">id</label>
+          <div class="layui-input-block">
+            <input type="text" id="userid" name="userid" required lay-verify="required" autocomplete="off" class="layui-input" disabled="disabled">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">用户名</label>
+          <div class="layui-input-block">
+            <input type="text" id="username" name="username" required lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">体温状态</label>
+          <div class="layui-input-block">
+            <select id="status" name="status" lay-verify="required">
+              <option value=""></option>
+              <option value="safety">正常</option>
+              <option value="warning">发热</option>
+            </select>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">打卡时间</label>
+          <div class="layui-input-block">
+            <input type="text" id="lasttime" name="lasttime" required lay-verify="required" autocomplete="off" class="layui-input">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">账户状态</label>
+          <div class="layui-input-block">
+            <select id="disabled" name="disabled" lay-verify="required">
+              <option value=""></option>
+              <option value="false">正常</option>
+              <option value="true">禁用</option>
+            </select>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">人脸图片</label>
+          <div class="layui-input-inline">
+            <input type="file" class="layui-btn" id="upload" accept=".jpg">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="sub">提交</button>
+            <button type="reset" onclick="closeForm()" class="layui-btn layui-btn-primary">取消</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="layui-fluid" id="addPanel" style="display: none;">
+      <h1>添加用户</h1>
+      <form class="layui-form">
+        <div class="layui-form-item">
+          <label class="layui-form-label">用户名</label>
+          <div class="layui-input-block">
+            <input type="text" name="add_username" required lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="add">添加</button>
+            <button type="reset" onclick="closeAdd()" class="layui-btn layui-btn-primary">取消</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <br>
+    <div style="text-align: center;">
+      <p>v1.0 © 2020 <a href="#">daka</a></p>
+    </div>
+  </div>
+  <script>
+  
+    function closeForm() {
+      document.getElementById("editPanel").style.display = "none";
+    }
+    
+    function add() {
+      document.getElementById("addPanel").style.display = "";
+    }
+
+    function closeAdd() {
+      document.getElementById("addPanel").style.display = "none";
+    }
+
+
+    layui.use(['form', 'table', 'element', 'jquery'], function () {
+      var element = layui.element;
+      var upload = layui.upload;
+      var table = layui.table;
+      var form = layui.form;
+      var $ = layui.$;
+      
+      table.render({
+          elem: '#userlist' //指定原始表格元素选择器（推荐id选择器）
+          , url: 'api.php?type=user'
+          , page: true //开启分页
+          , cols: [[
+            { field: 'id', title: 'id', sort: true }
+            , { field: 'name', title: '用户名' }
+            , { field: 'url', title: '人脸地址' }
+            , { field: 'statusmsg', title: '体温状态', sort: true }
+            , { field: 'lasttime', title: '上次打卡时间', sort: true }
+            , { field: 'disabledmsg', title: '账户状态', sort: true }
+            , { fixed: 'right', width: 140, align: 'center', toolbar: '#bar' }
+          ]]
+        });
+        
+        
+      table.on('tool(list)', function (obj) {
+        if (obj.event === 'edit') {
+          form.val("form", { //formTest 即 class="layui-form" 所在元素属性 lay-filter="" 对应的值
+            "userid": obj.data.id
+            ,"username": obj.data.name
+            ,"status": obj.data.status
+            ,"lasttime": obj.data.lasttime
+            ,"disabled": obj.data.disabled
+          });
+          // $("#userid").val(obj.data.id);
+          // $("#username").val(obj.data.name);
+          // $("#status").val(obj.data.status);
+          $("#editPanel").show();
+        } else if(obj.event === 'del'){ //删除
+          layer.confirm('真的要删除该用户吗？', function(index){
+            layer.close(index);
+            layer.load(2);
+            $.ajax({
+                type : "post",
+                url : "api.php?type=del&id=" + obj.data.id,
+                error : function(request) {
+                    layer.closeAll('loading');
+                    layer.alert('请求出错', {
+                        icon: 2,
+                        title:"操作失败"
+                    });
+                },
+                success : function(ret) {
+                    layer.closeAll('loading');
+                    layer.alert(ret, {
+                      icon: 1,
+                      title:"提示"
+                  });
+                  obj.del();
+                }
+             });
+          });
+        }
+      });
+      
+      form.on('submit(sub)', function(data){
+        layer.load(2);
+        document.getElementById('userid').disabled = false;
+        var formData = new FormData($("#form1")[0]);
+        var fobj = document.getElementById("upload").files[0];
+        if (typeof (fobj) != "undefined" && fobj.size > 0) {
+            formData.append("file", fobj);
+        }
+        $.ajax({
+            type : "post",
+            url : "api.php?type=edit",
+            data : formData,  // 你的formid
+            contentType: false,   //jax 中 contentType 设置为 false 是为了避免 JQuery 对其操作，从而失去分界符，而使服务器不能正常解析文件
+            processData: false,   //当设置为true的时候,jquery ajax 提交的时候不会序列化 data，而是直接使用data
+            error : function(request) {
+              layer.closeAll('loading');
+                layer.alert('操作失败', {
+                    icon: 2,
+                    title:"上传失败"
+                });
+            },
+            success : function(ret) {
+              layer.closeAll('loading');
+              layer.alert(ret, {
+                  icon: 1,
+                  title:"提示"
+              });
+              setTimeout(function () {
+                  window.location.reload();
+              },2000);
+            }
+         });
+
+        return false;
+      });
+
+      form.on('submit(add)', function(data){
+        layer.load(2);
+        $.ajax({
+          type: "GET",
+          contentType: "application/json;charset=UTF-8",
+          url: "api.php?type=adduser&name=" + data.field.add_username,
+          success: function (result) {
+            layer.closeAll('loading');
+            layer.alert(result, {
+                icon: 1,
+                title:"提示"
+            });
+            setTimeout(function () {
+                  window.location.reload();
+              },2000);
+          },
+          error: function (e) {
+            layer.closeAll('loading');
+            layer.msg('请求失败');
+            console.log(e.status);
+            console.log(e.responseText);
+          }
+        });
+        document.getElementById('addPanel').style.display = 'none';
+        return false;
+      });
+
+    });
+    
+  </script>
+</body>
+
+</html>

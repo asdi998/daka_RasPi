@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>打卡日志</title>
+  <script src="https://www.layuicdn.com/auto/layui.js" v="layui" e="layui"></script>
+</head>
+
+<body>
+  <div>
+    <ul class="layui-nav" style="text-align: right;">
+      <li class="layui-nav-item">
+        <a href="index.html">用户信息</a>
+        <dl class="layui-nav-child" style="text-align: center;">
+          <dd><a href="adduser.html">添加用户</a></dd>
+        </dl>
+      </li>
+      <li class="layui-nav-item layui-this"><a href="log.html">打卡日志</a></li>
+    </ul>
+  </div>
+  <div style="padding: 20px; background-color: #F2F2F2;">
+    <div class="layui-fluid" id="list">
+      <table id="loglist" lay-filter="list"></table>
+    </div>
+    <br>
+    <div style="text-align: center;">
+      <p>v1.0 © 2020 <a href="#">daka</a></p>
+    </div>
+  </div>
+  <script>
+    layui.use(['form', 'table', 'element', 'jquery'], function () {
+      var element = layui.element;
+      var table = layui.table;
+      var $ = layui.$;
+      
+      table.render({
+          elem: '#loglist' //指定原始表格元素选择器（推荐id选择器）
+          , url: 'api.php?type=log'
+          , page: true //开启分页
+          , cols: [[
+            { field: 'id', title: 'id', sort: true }
+            , { field: 'uid', title: '用户id', sort: true }
+            , { field: 'name', title: '用户名' }
+            , { field: 'temp', title: '体温/℃', sort: true }
+            , { field: 'time', title: '打卡时间', sort: true }
+          ]]
+        });
+    });
+  
+  </script>
+</body>
+
+</html>
